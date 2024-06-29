@@ -1,12 +1,22 @@
 import express from 'express'
+import dotenv from 'dotenv'
+
+import authRoutes from './routes/authRoutes.js'
+import connectDb from './db/connectDb.js';
+import cookieParser from 'cookie-parser';
+
+dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 8000;
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-app.get('/' , (req , res)=>{
-    res.json({message : "Hello World"});
-})
+app.use('/api/auth/' , authRoutes);
 
-app.listen(8000 , ()=>{
-    console.log("APp Running on Port 8000");
+app.listen(PORT , ()=>{
+    console.log(`App Running on Port ${PORT}`);
+    connectDb();
 })
