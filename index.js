@@ -1,6 +1,7 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import {v2 as cloudinary} from 'cloudinary'
+import cors from 'cors'
 
 import authRoutes from './routes/authRoutes.js'
 import userRoutes from './routes/userRoutes.js'
@@ -18,6 +19,7 @@ cloudinary.config({
 });
 
 const app = express();
+app.use(cors({credentials : true , origin : 'http://localhost:3000'}));
 const PORT = process.env.PORT || 8000;
 
 app.use(express.json());

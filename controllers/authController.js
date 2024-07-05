@@ -20,7 +20,7 @@ export const signup = async (req , res)=>{
    const validate =  EmailValidator.validate(email);
 
    if(!validate){
-    return res.stats(400).json({error : "Please enter a Valid Email"});
+    return res.status(400).json({error : "Please enter a Valid Email"});
    }
 
    const existingUser = await User.findOne({username});

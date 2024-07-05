@@ -1,5 +1,4 @@
 import express from 'express'
-import { signup , login , logout , getMe } from '../controllers/authController.js';
 import {protectedRoute} from '../middleware/protectedRoute.js';
 import { followUnfollowUser, getSuggestedUsers, getUserProfile, updateUser } from '../controllers/userController.js';
 
