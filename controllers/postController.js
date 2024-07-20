@@ -1,34 +1,51 @@
+import upload from "../middleware/multer.js";
 import Notification from "../models/notificationModel.js";
 import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
 import { v2 as cloudinary } from "cloudinary";
+import multer from 'multer'
 
+const uploadImg = upload.single('image');
 export const createPost = async (req, res) => {
 	try {
+
+		uploadImg(req, res, async function(err) {
+
+            if (err instanceof multer.MulterError) {
+    
+                if(err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({error : "Upload Image less than 150kb"})
+    
+            } else if (err) {
+               return res.status(400).json({error : err});
+            }
+
 		const { text } = req.body;
-		let { img } = req.body;
+		let imageFile = req.file;
 		const userId = req.user._id.toString();
 
 		const user = await User.findById(userId);
 		if (!user) return res.status(404).json({ message: "User not found" });
 
-		if (!text && !img) {
+		if (!text && !imageFile) {
 			return res.status(400).json({ error: "Post must have text or image" });
 		}
 
-		if (img) {
-			const uploadedResponse = await cloudinary.uploader.upload(img);
-			img = uploadedResponse.secure_url;
+		if (imageFile) {
+            const imageUpload = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" });
+			imageFile = imageUpload.secure_url;
 		}
 
 		const newPost = new Post({
 			user: userId,
 			text,
-			img,
+			img : imageFile ? imageFile : null
 		});
 
 		await newPost.save();
-		res.status(201).json(newPost);
+		res.status(200).json(newPost);
+
+	})
+
 	} catch (error) {
 		res.status(500).json({ error: "Internal server error" });
 		console.log("Error in createPost controller: ", error);
@@ -69,7 +86,7 @@ export const commentOnPost = async (req, res) => {
 		if (!text) {
 			return res.status(400).json({ error: "Text field is required" });
 		}
-		const post = await Post.findById(postId);
+		let post = await Post.findById(postId);
 
 		if (!post) {
 			return res.status(404).json({ error: "Post not found" });
@@ -80,6 +97,10 @@ export const commentOnPost = async (req, res) => {
 		post.comments.push(comment);
 		await post.save();
 
+		post = await Post.findById(postId).populate({
+			path: 'comments', 
+			populate: { path: 'user' }
+		  });
 		res.status(200).json(post);
 	} catch (error) {
 		console.log("Error in commentOnPost controller: ", error);
@@ -227,3 +248,21 @@ export const getUserPosts = async (req, res) => {
 		res.status(500).json({ error: "Internal server error" });
 	}
 };
+
+export const getSinglePost = async (req , res)=>{
+	try {
+		const {id} = req.params;
+
+	const post = await Post.findById(id).populate('user').populate({
+		path: 'comments', 
+		populate: { path: 'user' }
+	  });;
+	if (!post) {
+		return res.status(400).json({error : "Post not Found!"});
+	}
+	res.status(200).json(post);
+	} catch (error) {
+		console.log(error);
+		res.status(400).json({error : "Internal Server Error"})
+	}
+}
