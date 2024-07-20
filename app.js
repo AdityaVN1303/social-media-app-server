@@ -20,7 +20,6 @@ cloudinary.config({
 
 const app = express();
 app.use(cors({credentials : true , origin : 'https://social-media-app-client-omega.vercel.app'}));
-const PORT = process.env.PORT || 8000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -35,7 +34,7 @@ app.get("/" , (req , res)=>{
 	res.status(200).send("App Running Successfully !!!");
 })
 
-app.listen(PORT , ()=>{
-    console.log(`App Running on Port ${PORT}`);
+app.listen(5000 , ()=>{
+    console.log(`App Running on Port ${5000}`);
     connectDb();
 })
