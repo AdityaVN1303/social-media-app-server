@@ -19,7 +19,7 @@ cloudinary.config({
 });
 
 const app = express();
-app.use(cors({credentials : true , origin : 'http://localhost:1234'}));
+app.use(cors({credentials : true , origin : 'https://social-media-app-client-omega.vercel.app'}));
 const PORT = process.env.PORT || 8000;
 
 app.use(express.json());
